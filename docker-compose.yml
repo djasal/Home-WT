@@ -1,0 +1,118 @@
+name: home-dashboard-portal
+
+services:
+  # ==========================================
+  # 1. UNIFIED DASHBOARD PORTAL (Entrypoint)
+  # ==========================================
+  portal:
+    build: 
+      context: ./dashboard
+    container_name: unified-portal
+    restart: unless-stopped
+    ports:
+      - "80:5174" # Viewable directly at http://192.168.1.11
+    volumes:
+      - ./dashboard:/app
+      - /app/node_modules
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 5174"
+
+  # ==========================================
+  # 2. WATER TANK MICROSERVICE
+  # ==========================================
+  watertank-postgres:
+    image: postgres:16-alpine
+    container_name: watertank-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: watertank
+      POSTGRES_PASSWORD: watertank
+      POSTGRES_DB: watertank
+    ports:
+      - "5433:5432"
+    volumes:
+      - watertank-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U watertank -d watertank" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  watertank-app:
+    image: node:22-alpine
+    container_name: watertank-app
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./water tank:/app
+      - tunnel-data:/tmp/tunnel
+      - /app/node_modules
+      - /app/apps/api/node_modules
+      - /app/apps/web/node_modules
+    ports:
+      - "4000:4000"
+      - "5173:5173"
+    environment:
+      - DATABASE_URL=postgresql://watertank:watertank@watertank-postgres:5432/watertank?schema=public
+      - VITE_API_URL=/api
+      - VITE_SOCKET_URL=/
+    command: sh -c "npm install && npm run db:generate && npx --workspace @watertank/api prisma db push && npm run db:seed && npm run dev"
+    depends_on:
+      watertank-postgres:
+        condition: service_healthy
+
+  watertank-cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: watertank-cloudflared
+    user: root
+    restart: unless-stopped
+    volumes:
+      - tunnel-data:/tmp/tunnel
+    command: tunnel --url http://watertank-app:5173 --logfile /tmp/tunnel/cloudflared.log
+
+  # ==========================================
+  # 3. PARKING DETECTOR MICROSERVICE
+  # ==========================================
+  parking-detector:
+    build: 
+      context: ./parking-detector
+    container_name: parking-detector
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./parking-detector/data:/app/data
+
+  # ==========================================
+  # 4. CAMERA BRIDGE MICROSERVICE
+  # ==========================================
+  camera-mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: door-camera-bridge
+    restart: unless-stopped
+    ports:
+      - "8554:8554"
+      - "8889:8889"
+      - "8888:8888"
+      - "8189:8189/udp"
+    volumes:
+      - ./camera-bridge/mediamtx.yml:/mediamtx.yml
+
+  camera-pusher:
+    image: jrottenberg/ffmpeg:4.1-alpine
+    container_name: door-camera-pusher
+    network_mode: host
+    restart: unless-stopped
+    depends_on:
+      - camera-mediamtx
+    entrypoint: >
+      ffmpeg
+      -rtsp_transport tcp
+      -i rtsp://doorcamera:hgfvhmdkCAM@192.168.1.21:554/live/ch00_0
+      -c copy
+      -rtsp_transport tcp
+      -f rtsp
+      rtsp://localhost:8554/door
+
+volumes:
+  watertank-postgres-data:
+  tunnel-data:

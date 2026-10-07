@@ -1,0 +1,55 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: watertank-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: watertank
+      POSTGRES_PASSWORD: watertank
+      POSTGRES_DB: watertank
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U watertank -d watertank" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  app:
+    image: node:22-alpine
+    container_name: watertank-app
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./:/app
+      - tunnel-data:/tmp/tunnel
+      # Anonymous volumes for node_modules so Windows doesn't interfere
+      - /app/node_modules
+      - /app/apps/api/node_modules
+      - /app/apps/web/node_modules
+    ports:
+      - "4000:4000"
+      - "5173:5173"
+    environment:
+      - DATABASE_URL=postgresql://watertank:watertank@postgres:5432/watertank?schema=public
+      - VITE_API_URL=/api
+      - VITE_SOCKET_URL=/
+    command: sh -c "npm install && npm run db:generate && npx --workspace @watertank/api prisma db push && npm run db:seed && npm run dev"
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: watertank-cloudflared
+    user: root
+    restart: unless-stopped
+    volumes:
+      - tunnel-data:/tmp/tunnel
+    command: tunnel --url http://watertank-app:5173 --logfile /tmp/tunnel/cloudflared.log
+
+volumes:
+  postgres-data:
+  tunnel-data:

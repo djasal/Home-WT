@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Parking Zone Editor</title>
+    <style>
+        body { font-family: sans-serif; margin: 20px; background: #f0f0f0; }
+        .container { display: flex; gap: 20px; }
+        .canvas-container { position: relative; border: 1px solid #ccc; background: #fff; }
+        canvas { cursor: crosshair; }
+        .sidebar { width: 300px; background: #fff; padding: 15px; border-radius: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        select, input, button { width: 100%; padding: 8px; margin-bottom: 10px; box-sizing: border-box; }
+        button { background: #007bff; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        button:hover { background: #0056b3; }
+        .btn-danger { background: #dc3545; }
+        .btn-danger:hover { background: #c82333; }
+        .btn-success { background: #28a745; }
+        .btn-success:hover { background: #218838; }
+        #zone-list { max-height: 300px; overflow-y: auto; border: 1px solid #eee; padding: 5px; }
+        .zone-item { display: flex; justify-content: space-between; padding: 5px; border-bottom: 1px solid #eee; }
+        .zone-item button { width: auto; padding: 2px 5px; margin: 0; }
+    </style>
+</head>
+<body>
+    <h1>Parking Zone Editor</h1>
+    <p>1. Select a camera &nbsp; 2. Load snapshot (from data/snapshots) &nbsp; 3. Click to draw 4 points for each space &nbsp; 4. Export JSON.</p>
+
+    <div class="container">
+        <div class="canvas-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+        </div>
+
+        <div class="sidebar">
+            <div class="form-group">
+                <label>Select Camera:</label>
+                <select id="camera-select">
+                    <option value="camera_2">camera_2</option>
+                    <option value="camera_3">camera_3</option>
+                    <option value="camera_4">camera_4</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Load Snapshot:</label>
+                <input type="file" id="image-loader" accept="image/jpeg, image/png">
+            </div>
+
+            <div class="form-group">
+                <label>Current Space ID:</label>
+                <input type="text" id="space-id" placeholder="e.g. A1">
+            </div>
+
+            <p style="font-size: 0.9em; color: #555;">Click 4 corners on the image to define a space.</p>
+
+            <hr>
+            <h3>Zones for <span id="current-cam-label">camera_2</span></h3>
+            <div id="zone-list"></div>
+
+            <hr>
+            <button class="btn-success" id="btn-export">Export zones.json</button>
+            <button class="btn-danger" id="btn-clear-points">Clear Current Points</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const imageLoader = document.getElementById('image-loader');
+        const cameraSelect = document.getElementById('camera-select');
+        const spaceIdInput = document.getElementById('space-id');
+        const currentCamLabel = document.getElementById('current-cam-label');
+        const zoneList = document.getElementById('zone-list');
+
+        let img = new Image();
+        let currentPoints = [];
+        let zones = { camera_2: [], camera_3: [], camera_4: [] };
+        let currentCamera = 'camera_2';
+
+        cameraSelect.addEventListener('change', (e) => {
+            currentCamera = e.target.value;
+            currentCamLabel.textContent = currentCamera;
+            currentPoints = [];
+            spaceIdInput.value = '';
+            redraw();
+            updateZoneList();
+        });
+
+        imageLoader.addEventListener('change', (e) => {
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                img.onload = () => {
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    redraw();
+                }
+                img.src = event.target.result;
+            }
+            reader.readAsDataURL(e.target.files[0]);
+        });
+
+        canvas.addEventListener('mousedown', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const x = Math.round(e.clientX - rect.left);
+            const y = Math.round(e.clientY - rect.top);
+
+            currentPoints.push([x, y]);
+            
+            if (currentPoints.length === 4) {
+                const id = spaceIdInput.value.trim() || `Space_${zones[currentCamera].length + 1}`;
+                zones[currentCamera].push({ id: id, label: id, polygon: currentPoints });
+                currentPoints = [];
+                spaceIdInput.value = '';
+                updateZoneList();
+            }
+            redraw();
+        });
+
+        document.getElementById('btn-clear-points').addEventListener('click', () => { currentPoints = []; redraw(); });
+
+        document.getElementById('btn-export').addEventListener('click', () => {
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(zones, null, 2));
+            const dlAnchorElem = document.createElement('a');
+            dlAnchorElem.setAttribute("href", dataStr);
+            dlAnchorElem.setAttribute("download", "zones.json");
+            dlAnchorElem.click();
+        });
+
+        window.removeZone = function(cam, index) {
+            zones[cam].splice(index, 1);
+            redraw();
+            updateZoneList();
+        }
+
+        function updateZoneList() {
+            zoneList.innerHTML = '';
+            zones[currentCamera].forEach((zone, index) => {
+                const div = document.createElement('div');
+                div.className = 'zone-item';
+                div.innerHTML = `<span>${zone.id}</span><button class="btn-danger" onclick="removeZone('${currentCamera}', ${index})">X</button>`;
+                zoneList.appendChild(div);
+            });
+        }
+
+        function redraw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            if (img.src) ctx.drawImage(img, 0, 0);
+
+            zones[currentCamera].forEach(zone => {
+                drawPolygon(zone.polygon, 'rgba(0, 255, 0, 0.3)', '#00ff00');
+                const center = getPolygonCenter(zone.polygon);
+                ctx.fillStyle = '#fff';
+                ctx.font = '16px sans-serif';
+                ctx.fillText(zone.id, center.x - 10, center.y + 5);
+            });
+
+            if (currentPoints.length > 0) {
+                ctx.fillStyle = 'red';
+                currentPoints.forEach(p => {
+                    ctx.beginPath();
+                    ctx.arc(p[0], p[1], 4, 0, Math.PI * 2);
+                    ctx.fill();
+                });
+
+                ctx.strokeStyle = 'red';
+                ctx.lineWidth = 2;
+                ctx.beginPath();
+                ctx.moveTo(currentPoints[0][0], currentPoints[0][1]);
+                for (let i = 1; i < currentPoints.length; i++) {
+                    ctx.lineTo(currentPoints[i][0], currentPoints[i][1]);
+                }
+                ctx.stroke();
+            }
+        }
+
+        function drawPolygon(points, fillColor, strokeColor) {
+            if (points.length < 3) return;
+            ctx.fillStyle = fillColor;
+            ctx.strokeStyle = strokeColor;
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(points[0][0], points[0][1]);
+            for (let i = 1; i < points.length; i++) ctx.lineTo(points[i][0], points[i][1]);
+            ctx.closePath();
+            ctx.fill();
+            ctx.stroke();
+        }
+
+        function getPolygonCenter(points) {
+            let cx = 0, cy = 0;
+            points.forEach(p => { cx += p[0]; cy += p[1]; });
+            return { x: cx / points.length, y: cy / points.length };
+        }
+    </script>
+</body>
+</html>

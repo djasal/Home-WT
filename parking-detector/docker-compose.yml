@@ -1,0 +1,11 @@
+version: '3.8'
+
+services:
+  parking-detector:
+    build: .
+    container_name: parking-detector
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./data:/app/data

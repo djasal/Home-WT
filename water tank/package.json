@@ -1,0 +1,23 @@
+{
+  "name": "watertank-monitor",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "apps/api",
+    "apps/web"
+  ],
+  "scripts": {
+    "dev": "concurrently \"npm run dev --workspace @watertank/api\" \"npm run dev --workspace @watertank/web\"",
+    "dev:api": "npm run dev --workspace @watertank/api",
+    "dev:web": "npm run dev --workspace @watertank/web",
+    "build": "npm run build --workspaces",
+    "check": "npm run check --workspaces",
+    "db:generate": "npm run prisma:generate --workspace @watertank/api",
+    "db:migrate": "npm run prisma:migrate --workspace @watertank/api",
+    "db:seed": "npm run db:seed --workspace @watertank/api",
+    "simulate:esp32": "npm run simulate:esp32 --workspace @watertank/api"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.2"
+  }
+}

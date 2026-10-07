@@ -1,0 +1,28 @@
+services:
+  mediamtx:
+    image: bluenviron/mediamtx:latest
+    container_name: door-camera-bridge
+    restart: unless-stopped
+    ports:
+      - "8554:8554"   # RTSP input
+      - "8889:8889"   # WebRTC
+      - "8888:8888"   # HLS
+      - "8189:8189/udp" # ICE
+    volumes:
+      - ./mediamtx.yml:/mediamtx.yml
+
+  camera-pusher:
+    image: jrottenberg/ffmpeg:4.1-alpine
+    container_name: door-camera-pusher
+    network_mode: host
+    restart: unless-stopped
+    depends_on:
+      - mediamtx
+    entrypoint: >
+      ffmpeg
+      -rtsp_transport tcp
+      -i rtsp://doorcamera:hgfvhmdkCAM@192.168.1.21:554/live/ch00_0
+      -c copy
+      -rtsp_transport tcp
+      -f rtsp
+      rtsp://localhost:8554/door

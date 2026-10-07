@@ -1,0 +1,544 @@
+/* =========================================
+   SHARED UTILITIES
+   ========================================= */
+
+.widget-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  width: 100%;
+  position: relative;
+  z-index: 10;
+}
+
+.centered {
+  align-items: center;
+  justify-content: center;
+}
+
+/* =========================================
+   ANIMATIONS
+   ========================================= */
+
+.animate-pulse {
+  animation: pulse 3s infinite ease-in-out;
+}
+
+.float-anim {
+  animation: float 6s infinite ease-in-out;
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-5px); }
+  100% { transform: translateY(0px); }
+}
+
+/* =========================================
+   WEATHER WIDGET
+   ========================================= */
+
+.weather-layout {
+  flex-direction: column;
+  justify-content: center;
+  gap: 16px;
+  height: 100%;
+  padding-top: 10px;
+}
+
+.weather-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  flex-shrink: 0;
+  padding-left: 20px;
+}
+
+.temp-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-shadow: 0 4px 12px rgba(0,0,0,0.5);
+}
+
+.temp {
+  font-size: 5rem;
+  font-weight: 700;
+  line-height: 1;
+  font-family: 'Outfit', sans-serif;
+}
+
+.city {
+  font-size: 1.1rem;
+  color: rgba(255,255,255,0.8);
+  font-weight: 500;
+}
+
+.weather-details {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  background: rgba(11, 19, 36, 0.4);
+  backdrop-filter: blur(8px);
+  padding: 24px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  flex: 1;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  align-items: center;
+}
+
+.detail-item .label {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-item .value {
+  font-weight: 600;
+  color: white;
+}
+
+/* Weather Settings */
+
+.settings-btn {
+  position: absolute;
+  top: 24px;
+  right: 24px;
+  background: transparent;
+  border: none;
+  color: rgba(255,255,255,0.6);
+  cursor: pointer;
+  padding: 8px;
+  border-radius: 50%;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.settings-btn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-primary);
+  transform: rotate(90deg);
+}
+
+.settings-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  width: 100%;
+  padding: 8px 0;
+  flex: 1;
+}
+
+.settings-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.settings-group label {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+}
+
+.settings-input {
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--glass-border);
+  padding: 12px 16px;
+  border-radius: 8px;
+  color: white;
+  outline: none;
+  font-family: inherit;
+  font-size: 1rem;
+  transition: border-color 0.2s;
+}
+
+.settings-input:focus {
+  border-color: var(--accent-blue);
+}
+
+.settings-input option {
+  background: var(--bg-color);
+}
+
+.settings-save-btn {
+  background: var(--accent-blue);
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 1rem;
+  font-family: inherit;
+  transition: background 0.2s;
+}
+
+.settings-save-btn:hover {
+  background: #1d4ed8;
+}
+
+/* Adhan Strip */
+.adhan-strip {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  background: rgba(11, 19, 36, 0.4);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-md);
+  padding: 12px 16px;
+  margin-top: 16px;
+}
+
+.adhan-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.adhan-name {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.adhan-time {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: white;
+  font-family: 'Outfit', sans-serif;
+}
+
+/* =========================================
+   WATER TANK WIDGET
+   ========================================= */
+
+.tank-widget-layout {
+  flex-direction: row;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 32px;
+  padding-left: 16px;
+  height: 100%;
+}
+
+.tank-visual-area {
+  display: flex;
+  align-items: stretch;
+  gap: 16px;
+  height: 180px;
+}
+
+/* 3D Glass Cylinder */
+.tank-cylinder {
+  width: 90px;
+  height: 100%;
+  border-radius: 12px;
+  position: relative;
+  background: linear-gradient(90deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,0.6) 20%, rgba(0,0,0,0.8) 50%, rgba(0,0,0,0.6) 80%, rgba(255,255,255,0.05) 100%);
+  border: 1px solid rgba(255,255,255,0.1);
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8), 0 0 30px rgba(6, 182, 212, 0.1);
+  overflow: hidden;
+}
+
+/* 3D Top Lid */
+.tank-lid {
+  position: absolute;
+  top: -8px;
+  left: 0;
+  width: 100%;
+  height: 16px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  z-index: 5;
+}
+
+/* 3D Water Level */
+.water-level {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: linear-gradient(90deg, #0284c7 0%, #3b82f6 50%, #0284c7 100%);
+  transition: height 1s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: inset 0 10px 20px rgba(255,255,255,0.2), 0 -4px 16px rgba(37, 99, 235, 0.4);
+}
+
+/* 3D Water Surface (Oval) */
+.water-surface {
+  position: absolute;
+  top: -8px;
+  left: 0;
+  width: 100%;
+  height: 16px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, rgba(255,255,255,0.4) 0%, #60a5fa 100%);
+  border-top: 1px solid rgba(255,255,255,0.5);
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.5);
+}
+
+/* Vertical Scale */
+.tank-scale {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--text-secondary);
+  font-size: 0.65rem;
+  font-weight: 600;
+  padding: 4px 0;
+}
+
+.scale-line {
+  flex: 1;
+  width: 2px;
+  background: repeating-linear-gradient(
+    to bottom,
+    rgba(255,255,255,0.1) 0,
+    rgba(255,255,255,0.1) 2px,
+    transparent 2px,
+    transparent 8px
+  );
+  margin: 6px 0;
+}
+
+/* Stats Area */
+.tank-stats-area {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+}
+
+.tank-percentage {
+  font-size: 4rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1;
+  color: white;
+  text-shadow: 0 0 20px rgba(37, 99, 235, 0.3);
+}
+
+.tank-sublabel {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  margin-bottom: 8px;
+}
+
+.tank-mini-bar {
+  width: 60px;
+  height: 6px;
+  background: rgba(255,255,255,0.1);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.tank-mini-bar-fill {
+  height: 100%;
+  background: var(--accent-blue);
+  border-radius: 4px;
+  transition: width 1s ease;
+}
+
+/* =========================================
+   PARKING WIDGET
+   ========================================= */
+
+.parking-layout {
+  flex: 1;
+  flex-direction: column;
+  gap: 24px;
+  overflow: auto;
+}
+
+.parking-summary {
+  display: flex;
+  justify-content: space-around;
+  background: rgba(0, 0, 0, 0.25);
+  padding: 16px;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(255,255,255,0.05);
+  flex-shrink: 0;
+}
+
+.stat {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.stat .stat-value {
+  font-size: 2.2rem;
+  font-weight: 700;
+  font-family: 'Outfit', sans-serif;
+  line-height: 1;
+}
+
+.stat .stat-label {
+  font-size: 0.8rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.parking-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 12px;
+  overflow: auto;
+  padding: 4px;
+}
+
+.parking-spot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 10px 8px;
+  border-radius: var(--radius-md);
+  border: 2px solid;
+  background: rgba(0, 0, 0, 0.3);
+  transition: var(--transition);
+  gap: 6px;
+  position: relative;
+}
+
+.parking-spot.free {
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: inset 0 0 20px rgba(16, 185, 129, 0.05);
+}
+
+.parking-spot.occupied {
+  border-color: rgba(244, 63, 94, 0.4);
+  box-shadow: inset 0 0 20px rgba(244, 63, 94, 0.05);
+}
+
+.spot-name {
+  font-weight: 700;
+  font-size: 1.1rem;
+  font-family: 'Outfit', sans-serif;
+}
+
+.spot-icon {
+  font-size: 1.2rem;
+}
+
+.spot-badge {
+  font-size: 0.65rem;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.parking-spot.free .spot-badge {
+  background: rgba(16, 185, 129, 0.15);
+  color: #10b981;
+}
+
+.parking-spot.occupied .spot-badge {
+  background: rgba(244, 63, 94, 0.15);
+  color: #f43f5e;
+}
+
+.no-data {
+  color: var(--text-secondary);
+  text-align: center;
+  grid-column: 1 / -1;
+  padding: 32px 0;
+  font-size: 0.95rem;
+}
+
+/* =========================================
+   CAMERA WIDGET
+   ========================================= */
+
+.camera-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  position: relative;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #000;
+  border: 1px solid rgba(255,255,255,0.05);
+}
+
+.camera-feed {
+  flex: 1;
+  width: 100%;
+  height: 100%;
+  border: none;
+  background: #000;
+  object-fit: cover;
+}
+
+.camera-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+  padding: 6px 14px;
+  border-radius: 20px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 1.5px;
+  border: 1px solid rgba(255,255,255,0.1);
+  pointer-events: none;
+}
+
+.camera-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--accent-red);
+  border-radius: 50%;
+  animation: pulse 2s infinite;
+}
+
+.camera-offline {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  color: var(--text-secondary);
+  padding: 32px;
+  text-align: center;
+}
+
+.camera-offline h4 {
+  color: var(--text-primary);
+  font-size: 1rem;
+}
+
+.camera-offline p {
+  font-size: 0.85rem;
+  line-height: 1.6;
+  max-width: 280px;
+}

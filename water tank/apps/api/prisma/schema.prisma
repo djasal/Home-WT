@@ -1,0 +1,207 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  USER
+}
+
+enum TankShape {
+  CYLINDER
+  RECTANGLE
+}
+
+enum TankStatus {
+  FULL
+  MEDIUM
+  LOW
+  CRITICAL
+}
+
+enum DeviceStatus {
+  ONLINE
+  OFFLINE
+  MAINTENANCE
+}
+
+enum AlertType {
+  LOW_LEVEL
+  HIGH_LEVEL
+  DEVICE_OFFLINE
+  SENSOR_FAILURE
+  NO_DATA
+}
+
+enum AlertChannel {
+  EMAIL
+  PUSH
+  WEBHOOK
+}
+
+enum NotificationStatus {
+  PENDING
+  SENT
+  FAILED
+}
+
+model User {
+  id           String         @id @default(cuid())
+  name         String
+  email        String         @unique
+  passwordHash String
+  role         Role           @default(USER)
+  refreshTokens RefreshToken[]
+  tanks        Tank[]         @relation("TankOwner")
+  devices      Device[]       @relation("DeviceOwner")
+  alerts       Alert[]        @relation("AlertOwner")
+  settings     Setting?
+  logs         Log[]
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+}
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  tokenHash String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+}
+
+model Tank {
+  id               String        @id @default(cuid())
+  name             String
+  location         String
+  capacityLiters   Float
+  heightCm         Float
+  diameterCm       Float?
+  lengthCm         Float?
+  widthCm          Float?
+  shape            TankShape     @default(CYLINDER)
+  ownerId          String
+  owner            User          @relation("TankOwner", fields: [ownerId], references: [id])
+  currentPercent   Float         @default(0)
+  currentDistanceCm Float        @default(0)
+  currentVolumeLiters Float      @default(0)
+  status           TankStatus    @default(MEDIUM)
+  photoUrl         String?
+  notes            String?
+  installationDate DateTime?
+  devices          Device[]
+  measurements     Measurement[]
+  alerts           Alert[]
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  @@index([ownerId])
+}
+
+model Device {
+  id              String       @id @default(cuid())
+  deviceId        String       @unique
+  macAddress      String       @unique
+  firmwareVersion String
+  ipAddress       String?
+  wifiSignal      Int?
+  wifiSsid        String?
+  sensorOk        Boolean  @default(true)
+  sensorType      String       @default("JSN-SR04T")
+  status          DeviceStatus @default(OFFLINE)
+  lastSeen        DateTime?
+  tankId          String?
+  tank            Tank?        @relation(fields: [tankId], references: [id], onDelete: SetNull)
+  ownerId         String
+  owner           User         @relation("DeviceOwner", fields: [ownerId], references: [id])
+  measurements    Measurement[]
+  logs            Log[]
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
+
+  @@index([tankId])
+  @@index([ownerId])
+}
+
+model Measurement {
+  id            String   @id @default(cuid())
+  deviceId      String
+  device        Device   @relation(fields: [deviceId], references: [id], onDelete: Cascade)
+  tankId        String
+  tank          Tank     @relation(fields: [tankId], references: [id], onDelete: Cascade)
+  distanceCm    Float
+  percentage    Float
+  volumeLiters  Float
+  wifiRssi      Int?
+  temperatureC  Float?
+  batteryPct    Float?
+  recordedAt    DateTime
+  createdAt     DateTime @default(now())
+
+  @@index([tankId, recordedAt])
+  @@index([deviceId, recordedAt])
+}
+
+model Alert {
+  id          String       @id @default(cuid())
+  tankId      String?
+  tank        Tank?        @relation(fields: [tankId], references: [id], onDelete: Cascade)
+  ownerId     String
+  owner       User         @relation("AlertOwner", fields: [ownerId], references: [id])
+  type        AlertType
+  threshold   Float?
+  channel     AlertChannel @default(EMAIL)
+  enabled     Boolean      @default(true)
+  message     String
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([tankId])
+  @@index([ownerId])
+}
+
+model Notification {
+  id        String             @id @default(cuid())
+  alertId   String?
+  title     String
+  body      String
+  status    NotificationStatus @default(PENDING)
+  createdAt DateTime           @default(now())
+  sentAt    DateTime?
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  userId    String   @unique
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  theme     String   @default("system")
+  language  String   @default("en")
+  unit      String   @default("liters")
+  distanceUnit String @default("cm")
+  timezone  String   @default("Africa/Algiers")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Log {
+  id        String   @id @default(cuid())
+  userId    String?
+  user      User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  deviceId  String?
+  device    Device?  @relation(fields: [deviceId], references: [id], onDelete: SetNull)
+  level     String
+  message   String
+  metadata  Json?
+  createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([deviceId])
+}

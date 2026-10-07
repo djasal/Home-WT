@@ -1,0 +1,6 @@
+webrtcAllowOrigins: ["*"]
+hlsAllowOrigins: ["*"]
+
+paths:
+  door:
+    {}
