@@ -16,7 +16,8 @@
 WebServer server(80);
 
 // Variables for dynamic provisioning
-char apiUrl[100] = "http://192.168.1.11:4000/api/device/data";
+char apiUrl[100] = "http://192.168.1.12:4000/api/device/data";
+char apiUrl2[100] = "http://192.168.1.13:4000/api/device/data"; // <--- CHANGE THIS TO YOUR NEW SERVER IP
 char deviceToken[50] = "local-device-token";
 char deviceId[20] = "ESP001";
 
@@ -71,9 +72,6 @@ void setup() {
   // Load from NVS
   Preferences preferences;
   preferences.begin("watertank", false);
-  
-  // FORCE OVERWRITE OLD MEMORY:
-  preferences.putString("api_url", "http://192.168.1.11:4000/api/device/data");
 
   if (preferences.isKey("api_url")) {
     String url = preferences.getString("api_url", apiUrl);
@@ -383,14 +381,7 @@ float calculatePercentage(float currentDistance) {
 
 void sendMeasurement(float distance, float percentage, float internalTemp, bool sensorOk) {
   if (WiFi.status() == WL_CONNECTED) {
-    HTTPClient http;
-    http.begin(apiUrl);
-
-    // Headers required by your backend
-    http.addHeader("Content-Type", "application/json");
-    http.addHeader("x-device-token", deviceToken);
-
-    // Build JSON payload
+    // Build JSON payload once
     StaticJsonDocument<256> doc;
     doc["deviceId"] = deviceId;
     doc["distance"] = distance;
@@ -407,17 +398,36 @@ void sendMeasurement(float distance, float percentage, float internalTemp, bool 
     TS.print("Sending data: ");
     TS.println(jsonPayload);
 
-    // Send POST request
-    int httpResponseCode = http.POST(jsonPayload);
+    // --- SEND TO FIRST SERVER ---
+    HTTPClient http1;
+    http1.begin(apiUrl);
+    http1.addHeader("Content-Type", "application/json");
+    http1.addHeader("x-device-token", deviceToken);
 
-    if (httpResponseCode > 0) {
-      TS.print("HTTP Response code: ");
-      TS.println(httpResponseCode);
+    int httpResponseCode1 = http1.POST(jsonPayload);
+    if (httpResponseCode1 > 0) {
+      TS.print("Server 1 HTTP Response code: ");
+      TS.println(httpResponseCode1);
     } else {
-      TS.print("Error code: ");
-      TS.println(httpResponseCode);
+      TS.print("Server 1 Error code: ");
+      TS.println(httpResponseCode1);
     }
+    http1.end();
 
-    http.end();
+    // --- SEND TO SECOND SERVER ---
+    HTTPClient http2;
+    http2.begin(apiUrl2);
+    http2.addHeader("Content-Type", "application/json");
+    http2.addHeader("x-device-token", deviceToken);
+
+    int httpResponseCode2 = http2.POST(jsonPayload);
+    if (httpResponseCode2 > 0) {
+      TS.print("Server 2 HTTP Response code: ");
+      TS.println(httpResponseCode2);
+    } else {
+      TS.print("Server 2 Error code: ");
+      TS.println(httpResponseCode2);
+    }
+    http2.end();
   }
 }
