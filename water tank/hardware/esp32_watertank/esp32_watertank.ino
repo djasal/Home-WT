@@ -160,6 +160,23 @@ void setup() {
   ArduinoOTA.begin();
 
   // 3. Local Web Server Setup (To receive commands from dashboard)
+  // Restart ESP32 over WiFi without clearing credentials
+  auto handleRestart = []() {
+    TS.println("Restart requested via WiFi. Rebooting...");
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.send(200, "application/json", "{\"status\":\"success\", \"message\":\"Rebooting ESP32...\"}");
+    delay(1000);
+    ESP.restart();
+  };
+  server.on("/restart", HTTP_POST, handleRestart);
+  server.on("/restart", HTTP_GET, handleRestart);
+  server.on("/restart", HTTP_OPTIONS, []() {
+    server.sendHeader("Access-Control-Allow-Origin", "*");
+    server.sendHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    server.sendHeader("Access-Control-Allow-Headers", "Content-Type");
+    server.send(204);
+  });
+
   server.on("/reset-wifi", HTTP_POST, []() {
     TS.println("Dashboard requested WiFi Reset. Resetting...");
 
