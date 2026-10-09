@@ -23,6 +23,9 @@ char deviceId[20] = "ESP001";
 
 const char* OTA_PASSWORD = "hgfvhmdk@ESP32";  // Password required to push OTA updates
 
+// Flag to stop all other tasks while an OTA update is happening
+bool otaUpdating = false;
+
 // Flag for saving data from WiFiManager
 bool shouldSaveConfig = false;
 
@@ -73,10 +76,10 @@ void setup() {
   Preferences preferences;
   preferences.begin("watertank", false);
 
-  if (preferences.isKey("api_url")) {
-    String url = preferences.getString("api_url", apiUrl);
-    url.toCharArray(apiUrl, sizeof(apiUrl));
-  }
+  // if (preferences.isKey("api_url")) {
+  //   String url = preferences.getString("api_url", apiUrl);
+  //   url.toCharArray(apiUrl, sizeof(apiUrl));
+  // }
   if (preferences.isKey("device_id")) {
     String id = preferences.getString("device_id", deviceId);
     id.toCharArray(deviceId, sizeof(deviceId));
@@ -137,6 +140,7 @@ void setup() {
   ArduinoOTA.setHostname("WaterTank-ESP32");
   ArduinoOTA.setPassword(OTA_PASSWORD);  // Require password for OTA updates
   ArduinoOTA.onStart([]() {
+    otaUpdating = true;
     TS.println("OTA update starting...");
   });
   ArduinoOTA.onEnd([]() {
@@ -280,6 +284,11 @@ void loop() {
   // Handle OTA clients every loop
   ArduinoOTA.handle();
 
+  // If an OTA update has started, pause the rest of the program!
+  if (otaUpdating) {
+    return;
+  }
+
   // Handle incoming HTTP requests from dashboard
   server.handleClient();
 
@@ -398,36 +407,34 @@ void sendMeasurement(float distance, float percentage, float internalTemp, bool 
     TS.print("Sending data: ");
     TS.println(jsonPayload);
 
-    // --- SEND TO FIRST SERVER ---
-    HTTPClient http1;
-    http1.begin(apiUrl);
-    http1.addHeader("Content-Type", "application/json");
-    http1.addHeader("x-device-token", deviceToken);
+    // Array of target URLs
+    const char* targetUrls[] = {apiUrl, apiUrl2};
 
-    int httpResponseCode1 = http1.POST(jsonPayload);
-    if (httpResponseCode1 > 0) {
-      TS.print("Server 1 HTTP Response code: ");
-      TS.println(httpResponseCode1);
-    } else {
-      TS.print("Server 1 Error code: ");
-      TS.println(httpResponseCode1);
+    for (int i = 0; i < 2; i++) {
+      // Skip if the URL is empty
+      if (strlen(targetUrls[i]) == 0) continue;
+
+      HTTPClient http;
+      http.begin(targetUrls[i]);
+      http.setTimeout(2000); // 2-second timeout
+      http.addHeader("Content-Type", "application/json");
+      http.addHeader("x-device-token", deviceToken);
+
+      int httpResponseCode = http.POST(jsonPayload);
+      
+      if (httpResponseCode > 0) {
+        TS.print("Server ");
+        TS.print(i + 1);
+        TS.print(" Response: ");
+        TS.println(httpResponseCode);
+      } else {
+        TS.print("Server ");
+        TS.print(i + 1);
+        TS.print(" Error: ");
+        TS.println(http.errorToString(httpResponseCode).c_str()); // Better error message
+      }
+      
+      http.end();
     }
-    http1.end();
-
-    // --- SEND TO SECOND SERVER ---
-    HTTPClient http2;
-    http2.begin(apiUrl2);
-    http2.addHeader("Content-Type", "application/json");
-    http2.addHeader("x-device-token", deviceToken);
-
-    int httpResponseCode2 = http2.POST(jsonPayload);
-    if (httpResponseCode2 > 0) {
-      TS.print("Server 2 HTTP Response code: ");
-      TS.println(httpResponseCode2);
-    } else {
-      TS.print("Server 2 Error code: ");
-      TS.println(httpResponseCode2);
-    }
-    http2.end();
   }
 }
