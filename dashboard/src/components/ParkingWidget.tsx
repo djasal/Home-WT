@@ -7,7 +7,8 @@ export function ParkingWidget() {
   useEffect(() => {
     const fetchSpots = async () => {
       try {
-        const res = await fetch('http://localhost:8001/api/parking/status');
+        const apiHost = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+        const res = await fetch(`http://${apiHost}:8001/api/parking/status`);
         if (!res.ok) throw new Error('not ok');
         const data = await res.json();
         setSpots(data);

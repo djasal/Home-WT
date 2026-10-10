@@ -2,7 +2,7 @@ import { Droplets, Car, CloudRain, Video, LayoutDashboard, Settings, Bell, User,
 import { useState, useEffect } from 'react';
 import { WeatherWidget } from './components/WeatherWidget';
 import { WaterTankWidget } from './components/WaterTankWidget';
-import { ParkingWidget } from './components/ParkingWidget';
+import { ParkingPage } from './components/ParkingPage';
 import { CameraWidget } from './components/CameraWidget';
 import { DeviceDiagnostics } from './components/DeviceDiagnostics';
 import './index.css';
@@ -100,11 +100,10 @@ function App() {
               
             </div>
 
-            {/* RIGHT COLUMN: Camera (Top) & Parking (Bottom) */}
+            {/* RIGHT COLUMN: Door Camera (Full space) */}
             <div className="grid-col-right">
               
-              {/* Camera (Takes most space) */}
-              <div className="glass-panel camera-panel">
+              <div className="glass-panel camera-panel camera-full">
                 <div className="widget-header camera-header">
                   <div className="widget-title-group">
                     <div className="widget-icon red-icon"><Video size={22} /></div>
@@ -113,37 +112,18 @@ function App() {
                       <p className="widget-subtitle">Live feed - Entrance</p>
                     </div>
                   </div>
+                  <div className="status-badge normal-badge">
+                    <span className="dot animate-pulse"></span> LIVE
+                  </div>
                 </div>
                 <CameraWidget />
-              </div>
-
-              {/* Parking (Smaller, at bottom) */}
-              <div className="glass-panel parking-panel">
-                <div className="widget-header">
-                  <div className="widget-title-group">
-                    <div className="widget-icon purple-icon"><Car size={22} /></div>
-                    <div>
-                      <h2 className="widget-title">Parking Spot</h2>
-                      <p className="widget-subtitle">Real-time occupancy</p>
-                    </div>
-                  </div>
-                  <div className="status-badge view-badge">
-                    Live View <Eye size={14} />
-                  </div>
-                </div>
-                <ParkingWidget />
               </div>
               
             </div>
 
           </div>
         ) : currentView === 'parking' ? (
-          <div className="settings-page" style={{ padding: '24px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
-            <h2 style={{ marginBottom: '20px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}><Car className="purple-icon"/> Dedicated Parking View</h2>
-            <div className="glass-panel" style={{ flex: 1, minHeight: 0, padding: '24px' }}>
-              <ParkingWidget />
-            </div>
-          </div>
+          <ParkingPage />
         ) : currentView === 'camera' ? (
           <div className="settings-page" style={{ padding: '24px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
             <h2 style={{ marginBottom: '20px', color: 'white', display: 'flex', alignItems: 'center', gap: '10px' }}><Video className="red-icon"/> Dedicated Camera View</h2>

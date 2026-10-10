@@ -29,6 +29,7 @@ def run_camera(cam_config, shared_state, alert_engine):
         print(f"[{cam_config['name']}] WARNING: No zones defined in {config.ZONES_FILE}")
         
     zone_checker = ZoneChecker(zones_data)
+    last_zones_mtime = os.path.getmtime(config.ZONES_FILE) if os.path.exists(config.ZONES_FILE) else 0
     
     # Init space statuses to FREE if they exist
     for z in zones_data:
@@ -57,6 +58,28 @@ def run_camera(cam_config, shared_state, alert_engine):
         now = time.time()
         if now - last_process_time >= interval:
             last_process_time = now
+            
+            # Check for dynamic zone updates from UI
+            if os.path.exists(config.ZONES_FILE):
+                try:
+                    curr_mtime = os.path.getmtime(config.ZONES_FILE)
+                    if curr_mtime != last_zones_mtime:
+                        last_zones_mtime = curr_mtime
+                        with open(config.ZONES_FILE, "r") as f:
+                            all_zones = json.load(f)
+                            zones_data = all_zones.get(cam_config["id"], [])
+                        zone_checker = ZoneChecker(zones_data)
+                        for z in zones_data:
+                            if z["id"] not in shared_state:
+                                shared_state[z["id"]] = {"status": "FREE", "camera": cam_config["name"], "last_update": now}
+                        # Clean up deleted zones from shared_state for this camera
+                        current_ids = {z["id"] for z in zones_data}
+                        to_remove = [k for k, v in list(shared_state.items()) if v.get("camera") == cam_config["name"] and k not in current_ids]
+                        for k in to_remove:
+                            shared_state.pop(k, None)
+                        print(f"[{cam_config['name']}] Dynamically reloaded {len(zones_data)} updated zones from {config.ZONES_FILE}")
+                except Exception as e:
+                    print(f"[{cam_config['name']}] Error reloading zones: {e}")
             
             # Detect cars
             results = model(frame, conf=cam_config["confidence_threshold"], device=config.YOLO_DEVICE, verbose=False)[0]

@@ -81,6 +81,8 @@ services:
       - "8001:8001"
     volumes:
       - ./parking-detector/data:/app/data
+      - ./parking-detector/api:/app/api
+      - ./parking-detector/detector:/app/detector
 
   # ==========================================
   # 4. CAMERA BRIDGE MICROSERVICE

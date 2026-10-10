@@ -54,18 +54,18 @@ export function WeatherWidget() {
 
   const getWeatherIcon = (main: string) => {
     const s = main.toLowerCase();
-    if (s === 'clear') return <Sun size={64} className="animate-pulse" style={{ color: '#fbbf24' }} />;
-    if (s === 'rain' || s === 'drizzle') return <CloudRain size={64} style={{ color: '#3b82f6' }} />;
-    if (s === 'thunderstorm') return <CloudLightning size={64} style={{ color: '#a855f7' }} />;
-    if (s === 'snow') return <Snowflake size={64} className="float-anim" style={{ color: '#bae6fd' }} />;
-    return <Cloud size={64} className="float-anim" style={{ color: '#94a3b8' }} />;
+    if (s === 'clear') return <Sun size={38} className="animate-pulse" style={{ color: '#fbbf24' }} />;
+    if (s === 'rain' || s === 'drizzle') return <CloudRain size={38} style={{ color: '#3b82f6' }} />;
+    if (s === 'thunderstorm') return <CloudLightning size={38} style={{ color: '#a855f7' }} />;
+    if (s === 'snow') return <Snowflake size={38} className="float-anim" style={{ color: '#bae6fd' }} />;
+    return <Cloud size={38} className="float-anim" style={{ color: '#94a3b8' }} />;
   };
 
   return (
     <>
       <div className="widget-header weather-header" style={{ position: 'relative' }}>
         <div className="widget-title-group">
-          <div className="widget-icon white-icon"><CloudRain size={22} /></div>
+          <div className="widget-icon white-icon"><CloudRain size={18} /></div>
           <div>
             <h2 className="widget-title">Weather</h2>
             <p className="widget-subtitle">{weather ? `${weather.name}, ${weather.sys.country}` : city}</p>
@@ -111,30 +111,29 @@ export function WeatherWidget() {
             </div>
           ) : (
             <>
-              <div style={{ display: 'flex', width: '100%', gap: '16px', alignItems: 'center', flex: 1 }}>
-                <div className="weather-main">
-                  {getWeatherIcon(weather.weather[0].main)}
-                  <div className="temp-display">
+              <div className="weather-top-row">
+                <div className="weather-hero">
+                  <div className="weather-icon-box">
+                    {getWeatherIcon(weather.weather[0].main)}
+                  </div>
+                  <div className="weather-temp-info">
                     <span className="temp">{Math.round(weather.main.temp)}{unitLabel}</span>
-                    <span className="city">{weather.name}</span>
+                    <span className="condition-text">{weather.weather[0].description}</span>
                   </div>
                 </div>
-                <div className="weather-details">
-                  <div className="detail-item">
-                    <span className="label">Feels like</span>
-                    <span className="value">{Math.round(weather.main.feels_like)}{unitLabel}</span>
+
+                <div className="weather-metrics">
+                  <div className="metric-row">
+                    <span className="metric-label">Feels like</span>
+                    <span className="metric-value">{Math.round(weather.main.feels_like)}{unitLabel}</span>
                   </div>
-                  <div className="detail-item">
-                    <span className="label">Humidity</span>
-                    <span className="value">{weather.main.humidity}%</span>
+                  <div className="metric-row">
+                    <span className="metric-label">Humidity</span>
+                    <span className="metric-value">{weather.main.humidity}%</span>
                   </div>
-                  <div className="detail-item">
-                    <span className="label">Wind</span>
-                    <span className="value">{Math.round(weather.wind.speed)} {unit === 'metric' ? 'm/s' : 'mph'}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">Condition</span>
-                    <span className="value" style={{ textTransform: 'capitalize' }}>{weather.weather[0].description}</span>
+                  <div className="metric-row">
+                    <span className="metric-label">Wind</span>
+                    <span className="metric-value">{Math.round(weather.wind.speed)} {unit === 'metric' ? 'm/s' : 'mph'}</span>
                   </div>
                 </div>
               </div>

@@ -27,7 +27,6 @@ const getNavItems = (t: any) => [
   { to: "/devices", label: t("nav.devices"), icon: Smartphone },
   { to: "/history", label: t("nav.history"), icon: History },
   { to: "/analytics", label: t("nav.analytics"), icon: ChartNoAxesCombined },
-  { to: "/parking", label: t("nav.parking"), icon: Activity },
   { to: "/alerts", label: t("nav.alerts"), icon: Bell },
   { to: "/settings", label: t("nav.settings"), icon: Settings },
   { to: "/profile", label: t("nav.profile"), icon: User },

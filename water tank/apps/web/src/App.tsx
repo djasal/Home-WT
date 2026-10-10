@@ -12,7 +12,6 @@ import { HistoryPage } from "@/pages/HistoryPage";
 import { AnalyticsPage } from "@/pages/AnalyticsPage";
 import { SettingsPage } from "@/pages/SettingsPage";
 import { UsersPage } from "@/pages/UsersPage";
-import { ParkingPage } from "@/pages/ParkingPage";
 
 export const App = () => {
   const { user, isLoading } = useAuth();
@@ -35,7 +34,6 @@ export const App = () => {
         <Route path="history" element={<HistoryPage />} />
         <Route path="alerts" element={<AlertsPage />} />
         <Route path="analytics" element={<AnalyticsPage />} />
-        <Route path="parking" element={<ParkingPage />} />
         <Route path="settings" element={<SettingsPage />} />
         <Route path="profile" element={<PlaceholderPage page="profile" />} />
         <Route path="users" element={<UsersPage />} />

@@ -3,18 +3,18 @@ import { useState } from 'react';
 // MediaMTX serves:
 //  WebRTC: http://localhost:8889/door/
 //  HLS:    http://localhost:8888/door/  (more compatible fallback)
-const WEBRTC_URL = 'http://localhost:8889/door/';
-const HLS_URL = 'http://localhost:8888/door/index.m3u8';
-
 export function CameraWidget() {
   const [useHls, setUseHls] = useState(false);
+  const host = typeof window !== 'undefined' ? window.location.hostname : 'localhost';
+  const webrtcUrl = `http://${host}:8889/door/`;
+  const hlsUrl = `http://${host}:8888/door/`;
 
   return (
     <div className="camera-container">
       {useHls ? (
         /* HLS fallback via a simple video tag with hls.js loaded inline */
         <iframe
-          src={`http://localhost:8888/door/`}
+          src={hlsUrl}
           className="camera-feed"
           title="Door Camera (HLS)"
           allow="autoplay"
@@ -22,7 +22,7 @@ export function CameraWidget() {
       ) : (
         /* Primary: WebRTC via MediaMTX built-in player */
         <iframe
-          src={WEBRTC_URL}
+          src={webrtcUrl}
           className="camera-feed"
           title="Door Camera Live"
           allow="autoplay; camera"

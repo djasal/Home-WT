@@ -64,7 +64,7 @@ export function WaterTankWidget() {
     <>
       <div className="widget-header">
         <div className="widget-title-group">
-          <div className="widget-icon primary-icon"><Droplets size={22} /></div>
+          <div className="widget-icon primary-icon"><Droplets size={18} /></div>
           <div>
             <h2 className="widget-title">Water Tank</h2>
             <p className="widget-subtitle">Live level monitoring</p>

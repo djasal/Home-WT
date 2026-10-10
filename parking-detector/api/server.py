@@ -1,7 +1,8 @@
-from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi import FastAPI, Body
+from fastapi.responses import FileResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import os
+import json
 
 import config
 
@@ -45,3 +46,25 @@ def get_summary():
         "occupied": occupied,
         "percent_free": round(percent, 1)
     }
+
+@app.get("/api/parking/zones")
+def get_zones():
+    if os.path.exists(config.ZONES_FILE):
+        try:
+            with open(config.ZONES_FILE, "r") as f:
+                return json.load(f)
+        except Exception as e:
+            return {"error": str(e)}
+    return {"camera_2": [], "camera_3": [], "camera_4": []}
+
+@app.post("/api/parking/zones")
+def save_zones(zones: dict = Body(...)):
+    try:
+        os.makedirs(os.path.dirname(config.ZONES_FILE), exist_ok=True)
+        with open(config.ZONES_FILE, "w") as f:
+            json.dump(zones, f, indent=2)
+            f.flush()
+            os.fsync(f.fileno())
+        return {"status": "success", "message": "Zones updated successfully"}
+    except Exception as e:
+        return JSONResponse(status_code=500, content={"error": str(e)})
