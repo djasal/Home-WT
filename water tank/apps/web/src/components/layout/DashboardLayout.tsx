@@ -12,7 +12,8 @@ import {
   Sun,
   User,
   Users,
-  Waves
+  Waves,
+  Home
 } from "lucide-react";
 import { NavLink, Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -56,6 +57,17 @@ export const DashboardLayout = () => {
             <p className="truncate text-sm text-muted-foreground">WaterTank</p>
             <p className="truncate font-semibold">Monitor</p>
           </div>
+        </div>
+
+        <div className="p-3 pb-1">
+          <a
+            href={`http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}/`}
+            className="flex h-10 items-center gap-3 rounded-lg px-3 text-sm font-semibold text-primary bg-primary/10 hover:bg-primary/20 border border-primary/25 transition-all shadow-sm"
+            title="Return to Main Home Dashboard"
+          >
+            <Home className="h-4 w-4 shrink-0 text-primary" aria-hidden="true" />
+            <span>Home Dashboard</span>
+          </a>
         </div>
 
         <nav className="flex-1 space-y-1 overflow-y-auto p-3">
@@ -111,7 +123,15 @@ export const DashboardLayout = () => {
                 <p className="font-semibold">Monitor</p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex items-center gap-2">
+              <a
+                href={`http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}/`}
+                className="flex h-9 items-center gap-1.5 rounded-lg bg-primary/15 border border-primary/30 px-2.5 text-xs font-semibold text-primary hover:bg-primary/25"
+                title="Return to Main Home Dashboard"
+              >
+                <Home className="h-4 w-4" aria-hidden="true" />
+                <span>Home</span>
+              </a>
               <Button type="button" variant="secondary" size="icon" onClick={toggleTheme} title={t("settings.theme")}>
                 <ThemeIcon className="h-4 w-4" aria-hidden="true" />
               </Button>
@@ -141,6 +161,16 @@ export const DashboardLayout = () => {
         </header>
 
         <main className="mx-auto w-full max-w-[1440px] px-4 py-5 sm:px-6 lg:px-8">
+          <div className="mb-4 flex items-center">
+            <a
+              href={`http://${typeof window !== 'undefined' ? window.location.hostname : 'localhost'}/`}
+              className="inline-flex items-center gap-2 rounded-lg bg-primary/10 border border-primary/20 px-3.5 py-1.5 text-xs font-semibold text-primary hover:bg-primary/20 transition-colors"
+              title="Return to Main Smart Home Dashboard"
+            >
+              <Home className="h-3.5 w-3.5" />
+              <span>&larr; Back to Main Dashboard</span>
+            </a>
+          </div>
           <Outlet />
         </main>
       </div>

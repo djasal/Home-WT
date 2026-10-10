@@ -1,8 +1,12 @@
 import { useEffect, useState } from 'react';
 import { io } from 'socket.io-client';
-import { Droplets, Clock } from 'lucide-react';
+import { Droplets, Clock, ExternalLink } from 'lucide-react';
 
-export function WaterTankWidget() {
+interface WaterTankWidgetProps {
+  onOpenPage?: () => void;
+}
+
+export function WaterTankWidget({ onOpenPage }: WaterTankWidgetProps = {}) {
   const [level, setLevel] = useState<number | null>(null);
   const [socketConnected, setSocketConnected] = useState(false);
   const [deviceStatus, setDeviceStatus] = useState<string>('OFFLINE');
@@ -63,15 +67,36 @@ export function WaterTankWidget() {
   return (
     <>
       <div className="widget-header">
-        <div className="widget-title-group">
+        <div 
+          className="widget-title-group"
+          style={{ cursor: 'pointer' }}
+          onClick={() => {
+            if (onOpenPage) onOpenPage();
+            else window.open(`http://${window.location.hostname}:5173`, '_blank');
+          }}
+          title="Open Water Tank App"
+        >
           <div className="widget-icon primary-icon"><Droplets size={18} /></div>
           <div>
             <h2 className="widget-title">Water Tank</h2>
             <p className="widget-subtitle">Live level monitoring</p>
           </div>
         </div>
-        <div className={`status-badge ${healthClass}`}>
-          <span className="dot"></span> {healthState}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className={`status-badge ${healthClass}`}>
+            <span className="dot"></span> {healthState}
+          </div>
+          <a
+            href={`http://${window.location.hostname}:5173`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="widget-action-btn"
+            title="Open Water Tank App"
+            aria-label="Open Water Tank App"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ExternalLink size={15} />
+          </a>
         </div>
       </div>
 

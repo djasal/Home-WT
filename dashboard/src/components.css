@@ -98,12 +98,14 @@
   display: flex;
   flex-direction: column;
   gap: 6px;
-  background: rgba(11, 19, 36, 0.5);
-  backdrop-filter: blur(8px);
-  padding: 8px 12px;
+  background: rgba(8, 16, 36, 0.45);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 8px 14px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--glass-border);
-  min-width: 130px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  min-width: 135px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
 }
 
 .metric-row {
@@ -205,39 +207,155 @@
   background: #1d4ed8;
 }
 
-/* Adhan Strip */
-.adhan-strip {
+/* Enhanced Adhan Section */
+.adhan-section {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.adhan-header-row {
+  display: flex;
+  align-items: center;
   justify-content: space-between;
   width: 100%;
-  background: rgba(11, 19, 36, 0.4);
-  backdrop-filter: blur(8px);
-  border: 1px solid var(--glass-border);
+  padding: 0 2px;
+}
+
+.adhan-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.adhan-title {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #e2e8f0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+.adhan-hijri {
+  font-size: 0.68rem;
+  color: #94a3b8;
+  background: rgba(255, 255, 255, 0.06);
+  padding: 2px 6px;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.adhan-next-badge {
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: #60a5fa;
+  background: rgba(37, 99, 235, 0.15);
+  border: 1px solid rgba(37, 99, 235, 0.35);
+  padding: 2px 7px;
+  border-radius: 4px;
+}
+
+.adhan-controls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.adhan-ctrl-btn {
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+}
+
+.adhan-ctrl-btn:hover {
+  background: rgba(37, 99, 235, 0.25);
+  border-color: rgba(37, 99, 235, 0.5);
+  color: #ffffff;
+}
+
+.adhan-ctrl-btn.active-audio {
+  background: rgba(16, 185, 129, 0.2);
+  border-color: rgba(16, 185, 129, 0.5);
+  color: #34d399;
+}
+
+.adhan-strip {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 6px;
+  width: 100%;
+  background: rgba(8, 16, 36, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-sm);
-  padding: 8px 10px;
-  margin-top: 8px;
+  padding: 6px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .adhan-item {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 2px;
+  padding: 6px 2px;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+}
+
+.adhan-item.is-next {
+  background: rgba(37, 99, 235, 0.22);
+  border: 1px solid rgba(37, 99, 235, 0.5);
+  box-shadow: 0 0 12px rgba(37, 99, 235, 0.25);
+}
+
+.adhan-item.is-next .adhan-name {
+  color: #93c5fd;
+  font-weight: 700;
+}
+
+.adhan-item.is-next .adhan-time {
+  color: #ffffff;
+  font-weight: 700;
 }
 
 .adhan-name {
-  font-size: 0.62rem;
+  font-size: 0.65rem;
   color: var(--text-secondary);
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.1;
+}
+
+.adhan-ar-name {
+  font-size: 0.58rem;
+  opacity: 0.7;
 }
 
 .adhan-time {
-  font-size: 0.78rem;
+  font-size: 0.8rem;
   font-weight: 600;
   color: white;
   font-family: 'Outfit', sans-serif;
 }
+
 
 /* =========================================
    WATER TANK WIDGET

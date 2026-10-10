@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react';
 import { 
   Car, RefreshCw, AlertCircle, CheckCircle2, ShieldAlert, 
-  Map, Edit3, Camera, Save, Trash2, RotateCcw, Eye, Sparkles, Check
+  Map, Edit3, Camera, Save, Trash2, RotateCcw, Eye, Sparkles, Check, Home
 } from 'lucide-react';
 
 interface SpaceStatus {
@@ -64,7 +64,11 @@ const INITIAL_LAYOUT_SPOTS: LayoutSpotDef[] = [
   { id: 'P18', x: 736, y: 64, width: 44, height: 84, orientation: 'vertical' },
 ];
 
-export function ParkingPage() {
+interface ParkingPageProps {
+  onGoHome?: () => void;
+}
+
+export function ParkingPage({ onGoHome }: ParkingPageProps = {}) {
   const [activeTab, setActiveTab] = useState<'map' | 'editor' | 'cameras'>('map');
   const [spots, setSpots] = useState<Record<string, SpaceStatus>>({});
   const [zones, setZones] = useState<Record<string, ZonePolygon[]>>({ camera_2: [], camera_3: [], camera_4: [] });
@@ -331,6 +335,17 @@ export function ParkingPage() {
       {/* Top Header */}
       <div className="parking-page-header">
         <div className="page-title-row">
+          {onGoHome && (
+            <button
+              className="page-home-btn"
+              onClick={onGoHome}
+              title="Return to Main Dashboard"
+              aria-label="Return to Main Dashboard"
+            >
+              <Home size={18} />
+              <span>Home</span>
+            </button>
+          )}
           <div className="widget-icon purple-icon">
             <Car size={24} />
           </div>

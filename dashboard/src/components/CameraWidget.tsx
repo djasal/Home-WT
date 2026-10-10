@@ -30,10 +30,6 @@ export function CameraWidget() {
         />
       )}
 
-      <div className="camera-badge">
-        <span className="camera-dot" />
-        LIVE
-      </div>
 
       {/* Toggle button for debugging */}
       <button

@@ -1,4 +1,5 @@
 # Parking Detector - Configuration
+import os
 
 DAHUA_IP       = "192.168.1.108"
 DAHUA_USER     = "admin"
@@ -45,8 +46,8 @@ YOLO_IMG_SIZE = 640
 ZONES_FILE        = "data/zones.json"
 OVERLAP_THRESHOLD = 0.20
 
-# Alerts: fire when a space transitions OCCUPIED -> FREE
-ALERT_ON_FREE      = True
+# Alerts: disabled
+ALERT_ON_FREE      = False
 ALERT_COOLDOWN_SEC = 60
 TELEGRAM_BOT_TOKEN = ""
 TELEGRAM_CHAT_ID   = ""

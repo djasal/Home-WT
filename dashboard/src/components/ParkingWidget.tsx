@@ -1,6 +1,11 @@
 import { useEffect, useState } from 'react';
+import { Car, ExternalLink } from 'lucide-react';
 
-export function ParkingWidget() {
+interface ParkingWidgetProps {
+  onOpenPage?: () => void;
+}
+
+export function ParkingWidget({ onOpenPage }: ParkingWidgetProps = {}) {
   const [spots, setSpots] = useState<Record<string, any>>({});
   const [error, setError] = useState(false);
 
@@ -24,49 +29,77 @@ export function ParkingWidget() {
   }, []);
 
   const spotList = Object.entries(spots);
+  const total = spotList.length || 26;
   const free = spotList.filter(([, d]) => d.status === 'FREE').length;
-  const occupied = spotList.length - free;
-
-  if (error) {
-    return (
-      <div className="widget-content centered" style={{ color: 'var(--text-secondary)', fontSize: '0.9rem' }}>
-        Parking engine offline...
-      </div>
-    );
-  }
+  const occupied = spotList.length > 0 ? (total - free) : 0;
 
   return (
-    <div className="widget-content parking-layout">
-      <div className="parking-summary">
-        <div className="stat">
-          <span className="stat-value" style={{ color: '#22c55e' }}>{free}</span>
-          <span className="stat-label">Free</span>
+    <>
+      <div className="widget-header">
+        <div 
+          className="widget-title-group"
+          style={{ cursor: onOpenPage ? 'pointer' : 'default' }}
+          onClick={onOpenPage}
+          title="Open Parking Monitor Page"
+        >
+          <div className="widget-icon purple-icon"><Car size={18} /></div>
+          <div>
+            <h2 className="widget-title">Smart Parking</h2>
+            <p className="widget-subtitle">Live lot availability</p>
+          </div>
         </div>
-        <div className="stat">
-          <span className="stat-value">{spotList.length}</span>
-          <span className="stat-label">Total</span>
-        </div>
-        <div className="stat">
-          <span className="stat-value" style={{ color: '#ef4444' }}>{occupied}</span>
-          <span className="stat-label">Occupied</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div className="status-badge" style={{ background: 'rgba(16, 185, 129, 0.15)', color: '#10b981', border: '1px solid rgba(16, 185, 129, 0.3)' }}>
+            <span className="dot" style={{ background: '#10b981' }}></span> {free} Free
+          </div>
+          {onOpenPage && (
+            <button
+              className="widget-action-btn"
+              onClick={onOpenPage}
+              title="Open Parking Monitor Page"
+              aria-label="Open Parking Page"
+            >
+              <ExternalLink size={15} />
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="parking-grid">
-        {spotList.length === 0 && (
-          <div className="no-data">No parking zones detected yet...</div>
-        )}
-        {spotList.map(([name, data]) => {
-          const isFree = data.status === 'FREE';
-          return (
-            <div key={name} className={`parking-spot ${isFree ? 'free' : 'occupied'}`}>
-              <span className="spot-icon">{isFree ? '🟢' : '🔴'}</span>
-              <span className="spot-name">{name.replace('Parking Space ', '')}</span>
-              <span className="spot-badge">{data.status}</span>
+      <div className="widget-content parking-widget-compact">
+        {error ? (
+          <div style={{ color: 'var(--text-secondary)', fontSize: '0.85rem', textAlign: 'center', padding: '12px' }}>
+            Detector engine connecting...
+          </div>
+        ) : (
+          <>
+            <div className="parking-quick-stats">
+              <div className="quick-stat-box free-box">
+                <span className="stat-num text-green">{free}</span>
+                <span className="stat-desc">Free Slots</span>
+              </div>
+              <div className="quick-stat-box occupied-box">
+                <span className="stat-num text-red">{occupied}</span>
+                <span className="stat-desc">Occupied</span>
+              </div>
+              <div className="quick-stat-box total-box">
+                <span className="stat-num">{total}</span>
+                <span className="stat-desc">Total Bays</span>
+              </div>
             </div>
-          );
-        })}
+
+            {onOpenPage && (
+              <button 
+                className="parking-view-map-btn"
+                onClick={onOpenPage}
+                title="View full architectural map and camera zones"
+              >
+                <Car size={15} /> Open Real 2D Parking Map
+                <ExternalLink size={14} style={{ marginLeft: 'auto' }} />
+              </button>
+            )}
+          </>
+        )}
       </div>
-    </div>
+    </>
   );
 }
